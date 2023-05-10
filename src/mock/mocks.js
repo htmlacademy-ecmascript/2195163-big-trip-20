@@ -1,8 +1,4 @@
-import {
-  WAYPOINT_OPTIONS,
-  TRAVEL_WAYPOINTS,
-  DESCRIPTION_OFFERS,
-} from '../const.js';
+import { WAYPOINT_OPTIONS, TRAVEL_WAYPOINTS } from '../const.js';
 import { getRandomElem } from '../utils.js';
 
 const mapWaypoints = new Map();
@@ -11,12 +7,13 @@ const mapOptions = new Map();
 TRAVEL_WAYPOINTS.forEach((elem) => {
   mapWaypoints.set(elem, {
     id: 'cfe416cq-10xa-ye10-8077-2fs9a01edcab',
-    description: `${getRandomElem(DESCRIPTION_OFFERS)} ${elem}`,
+    description: `THERE SHOULD BE DESCTRIPTION OF ${elem}`,
     name: elem,
     pictures: Array.from({ length: Math.floor(Math.random() * 10) }, () => ({
       src: `https://loremflickr.com/248/152?random=${Math.floor(
         Math.random() * 100
       )}`,
+      description: `${elem} parliament building`,
     })),
   });
 });
