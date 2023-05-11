@@ -13,6 +13,7 @@ const mainPresenter = new MainPresenter({
   tripMain: tripMainElement,
   tripControlsFiltres: tripControlsFiltersElement,
   tripEventsSection: tripEventsSection,
+  waypointModel,
 });
 const waypointPresenter = new WaypointPresenter({
   waypointContainer: tripEventsSection,

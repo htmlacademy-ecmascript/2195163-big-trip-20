@@ -24,5 +24,6 @@ export const DESCRIPTION_OFFERS = [
   'Cras aliquet varius magna, non porta ligula feugiat eget.',
   'Fusce tristique felis at fermentum pharetra.',
   'Aliquam id orci ut lectus varius viverra.',
-  'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.'
+  'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.',
 ];
+export const FILTERS_OPTIONS = ['Everything', 'Future', 'Present', 'Past'];

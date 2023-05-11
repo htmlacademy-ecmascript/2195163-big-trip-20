@@ -8,19 +8,34 @@ export default class MainPresenter {
   #tripControlsFilters = null;
   #tripEventsSection = null;
 
-  constructor({ tripMain, tripControlsFiltres, tripEventsSection }) {
+  #waypointModel = '';
+  #waypoints = [];
+
+  constructor({
+    tripMain,
+    tripControlsFiltres,
+    tripEventsSection,
+    waypointModel,
+    waypoints,
+  }) {
     this.#tripMain = tripMain;
     this.#tripControlsFilters = tripControlsFiltres;
     this.#tripEventsSection = tripEventsSection;
+    this.#waypoints = waypoints;
+    this.#waypointModel = waypointModel;
   }
 
   init() {
-    render(new TripInfoView(), this.#tripMain, RenderPosition.AFTERBEGIN);
+    this.#waypoints = [...this.#waypointModel.points];
+
     render(
-      new TripFiltersView(),
+      new TripFiltersView(this.#waypoints),
       this.#tripControlsFilters,
       RenderPosition.AFTERBEGIN
     );
-    render(new TripSortView(), this.#tripEventsSection);
+    if (this.#waypoints.length !== 0) {
+      render(new TripInfoView(), this.#tripMain, RenderPosition.AFTERBEGIN);
+      render(new TripSortView(), this.#tripEventsSection);
+    }
   }
 }
