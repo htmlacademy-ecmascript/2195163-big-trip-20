@@ -27,3 +27,8 @@ export const DESCRIPTION_OFFERS = [
   'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.',
 ];
 export const FILTERS_OPTIONS = ['Everything', 'Future', 'Present', 'Past'];
+
+export const MODE = {
+  opened: 'opened',
+  closed: 'closed',
+};

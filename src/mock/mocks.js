@@ -1,3 +1,4 @@
+import { nanoid } from 'nanoid';
 import { WAYPOINT_OPTIONS, TRAVEL_WAYPOINTS } from '../const.js';
 import { getRandomElem } from '../utils.js';
 
@@ -31,12 +32,12 @@ WAYPOINT_OPTIONS.forEach((elem) => {
 export const getRandomData = () => {
   const type = getRandomElem(WAYPOINT_OPTIONS);
   return {
-    id: 'f4b62099-293f-4c3d-a702-94eec4a2808c',
+    id: nanoid(),
     basePrice: Math.floor(Math.random() * 1000),
     dateFrom: '2019-07-10T22:55:56.845Z',
     dateTo: '2019-07-11T11:22:13.375Z',
     destination: mapWaypoints.get(getRandomElem(TRAVEL_WAYPOINTS)),
-    isFavorite: [true, false][Math.floor(Math.random() * 2)],
+    isFavourite: [true, false][Math.floor(Math.random() * 2)],
     offers: mapOptions.get(type),
     type: type,
   };

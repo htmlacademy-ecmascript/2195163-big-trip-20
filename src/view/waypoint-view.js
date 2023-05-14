@@ -5,7 +5,15 @@ const HOURS_MINS = 'HH:mm';
 const DAYS_MONTH = 'MMM DD';
 
 function createWaypointElement(data) {
-  const { basePrice, dateFrom, dateTo, destination, offers, type } = data;
+  const {
+    basePrice,
+    dateFrom,
+    dateTo,
+    destination,
+    offers,
+    type,
+    isFavourite,
+  } = data;
 
   return /*html*/ `<li class="trip-events__item">
   <div class="event">
@@ -42,7 +50,9 @@ function createWaypointElement(data) {
         <span class="event__offer-price">${offers[0].price}</span>
       </li>
     </ul>
-    <button class="event__favorite-btn event__favorite-btn--active" type="button">
+    <button class="event__favorite-btn ${
+  isFavourite ? 'event__favorite-btn--active' : ''
+}" type="button">
       <span class="visually-hidden">Add to favorite</span>
       <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
         <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
@@ -58,20 +68,30 @@ function createWaypointElement(data) {
 export default class WaypointView extends AbstractView {
   #waypoint = null;
   #onEditClick = null;
+  #handleFavourite = null;
 
-  constructor({ waypoint, onEditClick }) {
+  constructor({ waypoint, onEditClick, handleFavourite }) {
     super();
     this.#waypoint = waypoint;
     this.#onEditClick = onEditClick;
+    this.#handleFavourite = handleFavourite;
 
     this.element
       .querySelector('.event__rollup-btn')
       .addEventListener('click', this.#onClickEvt);
+
+    this.element
+      .querySelector('.event__favorite-btn')
+      .addEventListener('click', this.#onFavEvt);
   }
 
   #onClickEvt = (evt) => {
     evt.preventDefault();
     this.#onEditClick();
+  };
+
+  #onFavEvt = () => {
+    this.#handleFavourite();
   };
 
   get template() {
