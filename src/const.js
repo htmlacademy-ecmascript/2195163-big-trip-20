@@ -19,16 +19,24 @@ export const WAYPOINT_OPTIONS = [
   'Restaurant',
 ];
 
-export const DESCRIPTION_OFFERS = [
-  'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-  'Cras aliquet varius magna, non porta ligula feugiat eget.',
-  'Fusce tristique felis at fermentum pharetra.',
-  'Aliquam id orci ut lectus varius viverra.',
-  'Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante.',
-];
 export const FILTERS_OPTIONS = ['Everything', 'Future', 'Present', 'Past'];
 
-export const MODE = {
-  opened: 'opened',
-  closed: 'closed',
+export const Mode = {
+  OPENED: 'opened',
+  CLOSED: 'closed',
+};
+
+export const FiltersType = {
+  EVERYTHING: 'default',
+  FUTURE: 'date-future',
+  PRESENT: 'date-present',
+  PAST: 'date-past',
+};
+
+export const SortType = {
+  DAY: 'day',
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+  OFFERS: 'offers',
 };

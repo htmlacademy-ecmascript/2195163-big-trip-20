@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
 
+const humanizeDate = (anyDate, dateFormat) =>
+  anyDate ? dayjs(anyDate).format(dateFormat) : '';
 
-const humanizeDate = (anyDate, dateFormat) => anyDate ? dayjs(anyDate).format(dateFormat) : '';
-
-const countDates = (dateFrom, dateTo) =>{
+const countDates = (dateFrom, dateTo) => {
   const daysDiff = dayjs(dateTo).diff(dayjs(dateFrom), 'day', true);
   const days = Math.floor(daysDiff);
   const hoursDiff = dayjs(dateTo).diff(dayjs(dateFrom), 'hour', true);
@@ -22,4 +22,44 @@ const countDates = (dateFrom, dateTo) =>{
 
 const getRandomElem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-export {getRandomElem, humanizeDate, countDates};
+function getWeight(optionA, optionB) {
+  if (optionA === null && optionB === null) {
+    return 0;
+  }
+  if (optionA === null) {
+    return 1;
+  }
+  if (optionB === null) {
+    return -1;
+  }
+  return null;
+}
+
+function sortWaypointsByDate(waypA, waypB) {
+  const weight = getWeight(waypA.dateFrom, waypB.dateFrom);
+  return weight ?? dayjs(waypA.dateFrom).diff(dayjs(waypB.dateFrom));
+}
+
+function sortWaypointsByTime(waypA, waypB) {
+  const weight = getWeight(waypA.dateFrom, waypB.dateFrom);
+
+  return (
+    weight ??
+    dayjs(waypB.dateTo).diff(dayjs(waypB.dateFrom)) -
+      dayjs(waypA.dateTo).diff(dayjs(waypA.dateFrom))
+  );
+}
+
+function sortWaypointsByPrice(waypA, waypB) {
+  return waypB.basePrice - waypA.basePrice;
+}
+
+export {
+  getRandomElem,
+  humanizeDate,
+  countDates,
+  getWeight,
+  sortWaypointsByDate,
+  sortWaypointsByTime,
+  sortWaypointsByPrice,
+};

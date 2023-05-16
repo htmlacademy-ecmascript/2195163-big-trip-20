@@ -18,7 +18,7 @@ function createTripFiltersElement(data) {
 } class="trip-filters__filter-input  visually-hidden"  type="radio" name="trip-filter" value="${elem.toLocaleLowerCase()} ${
   elem.toLocaleLowerCase === 'past' ? 'checked' : ''
 }">
-      <label class="trip-filters__filter-label" for="filter-everything">${elem}</label>
+      <label class="trip-filters__filter-label" for="filter-${elem.toLocaleLowerCase()}">${elem}</label>
     </div>`;
   }).join('')}
 
