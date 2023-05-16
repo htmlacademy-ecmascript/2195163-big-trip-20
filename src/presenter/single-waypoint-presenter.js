@@ -1,13 +1,13 @@
 import EditFormNoPhotosView from '../view/edit-form-no-photos-view.js';
 import WaypointView from '../view/waypoint-view.js';
 import { render, remove, replace } from '../framework/render.js';
-import { MODE } from '../const.js';
+import { Mode } from '../const.js';
 
 export default class SingleWaypointPresenter {
   #waypointComponent = null;
   #waypointEditComponent = null;
   #elem = null;
-  #state = MODE.closed;
+  #state = Mode.CLOSED;
 
   constructor(elem, changeFav, resetToClosed) {
     this.#elem = elem;
@@ -49,12 +49,12 @@ export default class SingleWaypointPresenter {
 
   replaceEditToInfo() {
     replace(this.#waypointComponent, this.#waypointEditComponent);
-    this.#state = MODE.closed;
+    this.#state = Mode.CLOSED;
   }
 
   replaceInfoToEdit() {
     replace(this.#waypointEditComponent, this.#waypointComponent);
-    this.#state = MODE.opened;
+    this.#state = Mode.OPENED;
   }
 
   destroy() {
@@ -67,7 +67,7 @@ export default class SingleWaypointPresenter {
   }
 
   resetView() {
-    if (this.#state !== MODE.closed) {
+    if (this.#state !== Mode.CLOSED) {
       this.replaceEditToInfo();
     }
   }
