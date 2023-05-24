@@ -9,14 +9,16 @@ export default class SingleWaypointPresenter {
   #elem = null;
   #state = Mode.CLOSED;
 
-  constructor(elem, changeFav, resetToClosed) {
+  constructor(elem, changeFav, resetToClosed, updateWaypointInfo) {
     this.#elem = elem;
     this.changeFav = changeFav;
     this.resetToClosed = resetToClosed;
+    this.updateWaypointInfo = updateWaypointInfo;
 
     const ecsKeydownHandler = (evt) => {
       if (evt.key === 'Escape') {
         evt.preventDefault();
+        this.#waypointEditComponent.reset(this.#elem);
         this.replaceEditToInfo();
         document.removeEventListener('keydown', ecsKeydownHandler);
       }
@@ -36,11 +38,14 @@ export default class SingleWaypointPresenter {
 
     this.#waypointEditComponent = new EditFormNoPhotosView({
       waypoint: this.#elem,
-      onFormSubmit: () => {
+      onFormSubmit: (updatedElement) => {
+        this.#elem = { ...updatedElement };
+        this.updateWaypointInfo(this.#elem);
         this.replaceEditToInfo();
         document.removeEventListener('keydown', ecsKeydownHandler);
       },
       onFormCancel: () => {
+        this.#waypointEditComponent.reset(this.#elem);
         this.replaceEditToInfo();
         document.removeEventListener('keydown', ecsKeydownHandler);
       },

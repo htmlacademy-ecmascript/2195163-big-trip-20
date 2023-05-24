@@ -1,4 +1,4 @@
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { humanizeDate, countDates } from '../utils.js';
 
 const HOURS_MINS = 'HH:mm';
@@ -65,24 +65,17 @@ function createWaypointElement(data) {
 </li>`;
 }
 
-export default class WaypointView extends AbstractView {
-  #waypoint = null;
+export default class WaypointView extends AbstractStatefulView {
   #onEditClick = null;
   #handleFavourite = null;
 
   constructor({ waypoint, onEditClick, handleFavourite }) {
     super();
-    this.#waypoint = waypoint;
+    this._setState(waypoint);
     this.#onEditClick = onEditClick;
     this.#handleFavourite = handleFavourite;
 
-    this.element
-      .querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#onClickEvt);
-
-    this.element
-      .querySelector('.event__favorite-btn')
-      .addEventListener('click', this.#onFavEvt);
+    this._restoreHandlers();
   }
 
   #onClickEvt = (evt) => {
@@ -94,7 +87,21 @@ export default class WaypointView extends AbstractView {
     this.#handleFavourite();
   };
 
+  static parseWaypointToState(waypoint) {
+    return waypoint;
+  }
+
   get template() {
-    return createWaypointElement(this.#waypoint);
+    return createWaypointElement(this._state);
+  }
+
+  _restoreHandlers() {
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#onClickEvt);
+
+    this.element
+      .querySelector('.event__favorite-btn')
+      .addEventListener('click', this.#onFavEvt);
   }
 }

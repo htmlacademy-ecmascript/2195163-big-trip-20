@@ -9,8 +9,9 @@ export default class WaypointPresenter {
   #waypointsInst = [];
   #waypointContainer = null;
 
-  constructor({ waypointContainer }) {
+  constructor({ waypointContainer, newSourcedWaypoints }) {
     this.#waypointContainer = waypointContainer;
+    this.newSourcedWaypoints = newSourcedWaypoints;
   }
 
   init(waypointsArray) {
@@ -28,7 +29,8 @@ export default class WaypointPresenter {
     const singleWaypointPresenter = new SingleWaypointPresenter(
       waypoint,
       this.changeFav,
-      this.resetToClosed
+      this.resetToClosed,
+      this.updateWaypoint
     );
     this.#waypointsInst.push(singleWaypointPresenter);
     singleWaypointPresenter.renderWaypont(placeToRender);
@@ -58,5 +60,17 @@ export default class WaypointPresenter {
     this.#waypointsInst.forEach((elem) => {
       elem.resetView();
     });
+  };
+
+  updateWaypoint = (updatedWaypoint) => {
+    this.#waypoints = this.#waypoints.map((elem) => {
+      if (elem.id === updatedWaypoint.id) {
+        return updatedWaypoint;
+      }
+      return elem;
+    });
+    this.clearList();
+    this.init(this.#waypoints);
+    this.newSourcedWaypoints(this.#waypoints);
   };
 }

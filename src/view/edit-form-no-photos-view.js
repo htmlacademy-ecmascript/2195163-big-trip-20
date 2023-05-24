@@ -1,5 +1,6 @@
 import { WAYPOINT_OPTIONS } from '../const.js';
-import AbstractView from '../framework/view/abstract-view.js';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import { mapWaypoints } from '../mock/mocks.js';
 
 function createEditNoPhotoForm(data) {
   const { destination, offers, type } = data;
@@ -106,31 +107,23 @@ function createEditNoPhotoForm(data) {
 </li>`;
 }
 
-export default class EditFormNoPhotosView extends AbstractView {
-  #waypoint = null;
+export default class EditFormNoPhotosView extends AbstractStatefulView {
   #handleSubmit = null;
   #handleCancel = null;
 
   constructor({ waypoint, onFormSubmit, onFormCancel }) {
     super();
-    this.#waypoint = waypoint;
+    this._setState(EditFormNoPhotosView.parseWaypointToState(waypoint));
     this.#handleSubmit = onFormSubmit;
     this.#handleCancel = onFormCancel;
 
-    this.element
-      .querySelector('.event__save-btn')
-      .addEventListener('submit', this.#formSubmitHandler);
-    this.element
-      .querySelector('.event__reset-btn')
-      .addEventListener('click', this.#formCancelHandler);
-    this.element
-      .querySelector('.event__rollup-btn')
-      .addEventListener('click', this.#formCancelHandler);
+    this._restoreHandlers();
   }
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleSubmit();
+
+    this.#handleSubmit(this._state);
   };
 
   #formCancelHandler = (evt) => {
@@ -138,7 +131,56 @@ export default class EditFormNoPhotosView extends AbstractView {
     this.#handleCancel();
   };
 
+  #formEventChangeHandler = (evt) => {
+    if (evt.target.tagName === 'INPUT') {
+      this.updateElement({
+        type: evt.target.value,
+      });
+    }
+  };
+
+  #formDestChangeHandler = (evt) => {
+    if (mapWaypoints.get(evt.target.value)) {
+      this.updateElement({
+        destination: mapWaypoints.get(evt.target.value),
+      });
+      this.element
+        .querySelector('.event__save-btn')
+        .removeAttribute('disabled', '');
+    } else {
+      this.element
+        .querySelector('.event__save-btn')
+        .setAttribute('disabled', '');
+    }
+  };
+
+  static parseWaypointToState(waypoint) {
+    return { ...waypoint };
+  }
+
   get template() {
-    return createEditNoPhotoForm(this.#waypoint);
+    return createEditNoPhotoForm(this._state);
+  }
+
+  _restoreHandlers() {
+    this.element
+      .querySelector('.event__save-btn')
+      .addEventListener('click', this.#formSubmitHandler);
+    this.element
+      .querySelector('.event__reset-btn')
+      .addEventListener('click', this.#formCancelHandler);
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#formCancelHandler);
+    this.element
+      .querySelector('.event__type-group')
+      .addEventListener('click', this.#formEventChangeHandler);
+    this.element
+      .querySelector('.event__input--destination')
+      .addEventListener('change', this.#formDestChangeHandler);
+  }
+
+  reset(waypoint) {
+    this.updateElement(EditFormNoPhotosView.parseWaypointToState(waypoint));
   }
 }
