@@ -78,6 +78,10 @@ export default class WaypointView extends AbstractStatefulView {
     this._restoreHandlers();
   }
 
+  get template() {
+    return createWaypointElement(this._state);
+  }
+
   #onClickEvt = (evt) => {
     evt.preventDefault();
     this.#onEditClick();
@@ -87,14 +91,6 @@ export default class WaypointView extends AbstractStatefulView {
     this.#handleFavourite();
   };
 
-  static parseWaypointToState(waypoint) {
-    return waypoint;
-  }
-
-  get template() {
-    return createWaypointElement(this._state);
-  }
-
   _restoreHandlers() {
     this.element
       .querySelector('.event__rollup-btn')
@@ -103,5 +99,9 @@ export default class WaypointView extends AbstractStatefulView {
     this.element
       .querySelector('.event__favorite-btn')
       .addEventListener('click', this.#onFavEvt);
+  }
+
+  static parseWaypointToState(waypoint) {
+    return waypoint;
   }
 }
