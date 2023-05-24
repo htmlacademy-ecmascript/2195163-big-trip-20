@@ -1,9 +1,13 @@
 import { WAYPOINT_OPTIONS } from '../const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { mapWaypoints } from '../mock/mocks.js';
+import { humanizeDate } from '../utils.js';
+import flatpickr from 'flatpickr';
+
+import 'flatpickr/dist/flatpickr.min.css';
 
 function createEditNoPhotoForm(data) {
-  const { destination, offers, type } = data;
+  const { destination, offers, type, dateFrom, dateTo } = data;
 
   return /*html*/ `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -46,10 +50,16 @@ function createEditNoPhotoForm(data) {
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="19/03/19 00:00">
+        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value=${humanizeDate(
+    dateFrom,
+    'DD/MM/YY HH:mm'
+  )}>
         &mdash;
         <label class="visually-hidden" for="event-end-time-1">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="19/03/19 00:00">
+        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value=${humanizeDate(
+    dateTo,
+    'DD/MM/YY HH:mm'
+  )}>
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -110,6 +120,8 @@ function createEditNoPhotoForm(data) {
 export default class EditFormNoPhotosView extends AbstractStatefulView {
   #handleSubmit = null;
   #handleCancel = null;
+  #datepickerTo = null;
+  #datepickerFrom = null;
 
   constructor({ waypoint, onFormSubmit, onFormCancel }) {
     super();
@@ -118,6 +130,24 @@ export default class EditFormNoPhotosView extends AbstractStatefulView {
     this.#handleCancel = onFormCancel;
 
     this._restoreHandlers();
+  }
+
+  get template() {
+    return createEditNoPhotoForm(this._state);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+
+    if (this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
   }
 
   #formSubmitHandler = (evt) => {
@@ -154,12 +184,43 @@ export default class EditFormNoPhotosView extends AbstractStatefulView {
     }
   };
 
-  static parseWaypointToState(waypoint) {
-    return { ...waypoint };
-  }
+  #fromDateSubmitHandler = ([userDateFrom]) => {
+    this.updateElement({
+      dateFrom: userDateFrom,
+    });
+  };
 
-  get template() {
-    return createEditNoPhotoForm(this._state);
+  #toDateSubmitHandler = ([userDateTo]) => {
+    this.updateElement({
+      dateTo: userDateTo,
+    });
+  };
+
+  #setDatepicker() {
+    if (this._state.dateFrom) {
+      this.#datepickerFrom = flatpickr(
+        this.element.querySelector('#event-start-time-1'),
+        {
+          enableTime: true,
+          maxDate: this._state.dateTo,
+          dateFormat: 'd/m/y H:i',
+          defaultDate: this._state.dateFrom,
+          onChange: this.#fromDateSubmitHandler,
+        }
+      );
+    }
+    if (this._state.dateTo) {
+      this.#datepickerTo = flatpickr(
+        this.element.querySelector('#event-end-time-1'),
+        {
+          enableTime: true,
+          minDate: this._state.dateFrom,
+          dateFormat: 'd/m/y H:i',
+          defaultDate: this._state.dateTo,
+          onChange: this.#toDateSubmitHandler,
+        }
+      );
+    }
   }
 
   _restoreHandlers() {
@@ -178,9 +239,14 @@ export default class EditFormNoPhotosView extends AbstractStatefulView {
     this.element
       .querySelector('.event__input--destination')
       .addEventListener('change', this.#formDestChangeHandler);
+    this.#setDatepicker();
   }
 
   reset(waypoint) {
     this.updateElement(EditFormNoPhotosView.parseWaypointToState(waypoint));
+  }
+
+  static parseWaypointToState(waypoint) {
+    return { ...waypoint };
   }
 }

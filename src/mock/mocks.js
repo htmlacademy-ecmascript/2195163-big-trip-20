@@ -34,7 +34,6 @@ export const getRandomData = () => {
   return {
     id: nanoid(),
     basePrice: Math.floor(Math.random() * 1000),
-    // 'dateFrom': '2019-07-10T22:55:56.845Z',
     dateFrom: new Date(
       2021,
       getRandomArbitrary(10, 11),
@@ -42,7 +41,6 @@ export const getRandomData = () => {
       getRandomArbitrary(0, 24),
       getRandomArbitrary(0, 60)
     ),
-    // 'dateTo': '2019-07-11T11:22:13.375Z',
     dateTo: new Date(
       2021,
       getRandomArbitrary(10, 11),
