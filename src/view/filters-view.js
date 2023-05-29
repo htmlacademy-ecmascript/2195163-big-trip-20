@@ -1,41 +1,53 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import { FILTERS_OPTIONS } from '../const.js';
 
-function createTripFiltersElement(data) {
-  const isEmpty = data.length === 0;
+function createTripFiltersElement({ currentFilter }) {
+  const filtersList = FILTERS_OPTIONS.map(
+    (elem) => /*html*/ `<div class="trip-filters__filter">
+      <input
+        id="filter-${elem}"
+        class="trip-filters__filter-input  visually-hidden"
+        type="radio"
+        ${elem === currentFilter ? 'checked' : ''}
+        name="trip-filter"
+        value="${elem}"
+      />
+      <label class="trip-filters__filter-label" for="filter-${elem}">
+        ${elem}
+      </label>
+    </div>`
+  ).join('');
 
-  return ` <form class="trip-filters" action="#" method="get">
-  ${FILTERS_OPTIONS.map((elem) => {
-    let isDisabled = false;
-    if (elem === FILTERS_OPTIONS[1] || elem === FILTERS_OPTIONS[3]) {
-      if (isEmpty) {
-        isDisabled = true;
-      }
-    }
-    return `<div class="trip-filters__filter">
-      <input id="filter-${elem.toLocaleLowerCase()}" ${
-  isDisabled && 'disabled'
-} class="trip-filters__filter-input  visually-hidden"  type="radio" name="trip-filter" value="${elem.toLocaleLowerCase()} ${
-  elem.toLocaleLowerCase === 'past' ? 'checked' : ''
-}">
-      <label class="trip-filters__filter-label" for="filter-${elem.toLocaleLowerCase()}">${elem}</label>
-    </div>`;
-  }).join('')}
-
-
-  <button class="visually-hidden" type="submit">Accept filter</button>
-</form>`;
+  return /*html*/ `<form class="trip-filters" action="#" method="get">
+      ${filtersList}
+      <button class="visually-hidden" type="submit">
+        Accept filter
+      </button>
+    </form>`;
 }
 
 export default class TripFiltersView extends AbstractView {
-  #filtersData = '';
+  #filters = null;
+  #currentFilter = null;
+  #handleChangeFilter = null;
 
-  constructor(data) {
+  constructor({ filters, currentFilterType, onFilterTypeChange }) {
     super();
-    this.#filtersData = data;
+    this.#filters = filters;
+    this.#currentFilter = currentFilterType;
+    this.#handleChangeFilter = onFilterTypeChange;
+
+    this.element.onchange = (evt) => {
+      if (evt.target.tagName === 'INPUT') {
+        this.#handleChangeFilter(evt.target.value);
+      }
+    };
   }
 
   get template() {
-    return createTripFiltersElement(this.#filtersData);
+    return createTripFiltersElement({
+      filters: this.#filters,
+      currentFilter: this.#currentFilter,
+    });
   }
 }
