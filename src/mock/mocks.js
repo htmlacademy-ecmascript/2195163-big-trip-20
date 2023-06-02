@@ -34,6 +34,7 @@ export const getRandomData = () => {
   return {
     id: nanoid(),
     basePrice: Math.floor(Math.random() * 1000),
+
     dateFrom: new Date(
       2021,
       getRandomArbitrary(10, 11),
@@ -41,6 +42,7 @@ export const getRandomData = () => {
       getRandomArbitrary(0, 24),
       getRandomArbitrary(0, 60)
     ),
+
     dateTo: new Date(
       2021,
       getRandomArbitrary(10, 11),
@@ -59,4 +61,4 @@ function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-export { mapWaypoints };
+export { mapWaypoints, mapOptions };

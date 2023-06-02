@@ -1,4 +1,7 @@
 import dayjs from 'dayjs';
+import { FiltersType } from './const';
+
+const ZERO = 0;
 
 const humanizeDate = (anyDate, dateFormat) =>
   anyDate ? dayjs(anyDate).format(dateFormat) : '';
@@ -22,21 +25,26 @@ const countDates = (dateFrom, dateTo) => {
 
 const getRandomElem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+
 function getWeight(optionA, optionB) {
   if (optionA === null && optionB === null) {
     return 0;
   }
+
   if (optionA === null) {
     return 1;
   }
+
   if (optionB === null) {
     return -1;
   }
+
   return null;
 }
 
 function sortWaypointsByDate(waypA, waypB) {
   const weight = getWeight(waypA.dateFrom, waypB.dateFrom);
+
   return weight ?? dayjs(waypA.dateFrom).diff(dayjs(waypB.dateFrom));
 }
 
@@ -54,6 +62,26 @@ function sortWaypointsByPrice(waypA, waypB) {
   return waypB.basePrice - waypA.basePrice;
 }
 
+function isDatesEqual(dateA, dateB) {
+  return (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
+}
+
+const filter = {
+  [FiltersType.EVERYTHING]: (events) => events,
+  [FiltersType.FUTURE]: (events) =>
+    events.filter(
+      (oneEvent) => dayjs(oneEvent.dateFrom).diff(new Date()) > ZERO
+    ),
+  [FiltersType.PRESENT]: (events) =>
+    events.filter(
+      (oneEvent) =>
+        dayjs(oneEvent.dateFrom).diff(new Date()) <= ZERO &&
+        dayjs(oneEvent.dateTo).diff(new Date()) >= ZERO
+    ),
+  [FiltersType.PAST]: (events) =>
+    events.filter((oneEvent) => dayjs(oneEvent.dateTo).diff(new Date()) < ZERO),
+};
+
 export {
   getRandomElem,
   humanizeDate,
@@ -62,4 +90,6 @@ export {
   sortWaypointsByDate,
   sortWaypointsByTime,
   sortWaypointsByPrice,
+  isDatesEqual,
+  filter,
 };
