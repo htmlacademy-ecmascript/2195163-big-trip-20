@@ -3,7 +3,6 @@ import { UpdateType } from '../const.js';
 
 export default class WaypointModel extends Observable {
   #pointsApiService = null;
-
   #waypoints = [];
   #offers = [];
   #destinations = [];
@@ -37,6 +36,8 @@ export default class WaypointModel extends Observable {
       );
     } catch (err) {
       this.#waypoints = [];
+      this.#destinations = [];
+      this.#offers = [];
     }
     this._notify(UpdateType.INIT);
   }

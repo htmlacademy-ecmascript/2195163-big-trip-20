@@ -51,11 +51,58 @@ export default class SingleWaypointPresenter {
     }
 
     if (this.#state === Mode.CLOSED) {
-      replace(this.#waypointEditComponent, prevEditComponent);
+      replace(this.#waypointComponent, prevEditComponent);
+      this.#state = Mode.OPENED;
     }
 
     remove(prevPointComponent);
     remove(prevEditComponent);
+  }
+
+  resetView() {
+    if (this.#state !== Mode.CLOSED) {
+      this.#replaceEditToInfo();
+    }
+  }
+
+  setSaving() {
+    if (this.#state === Mode.OPENED) {
+      this.#waypointEditComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  }
+
+  setDeleting() {
+    if (this.#state === Mode.OPENED) {
+      this.#waypointEditComponent.updateElement({
+        isDisabled: true,
+        isDeleting: true,
+      });
+    }
+  }
+
+  setAborting() {
+    if (this.#state === Mode.CLOSED) {
+      this.#waypointComponent.shake();
+      return;
+    }
+
+    const resetFromState = () => {
+      this.#waypointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#waypointEditComponent.shake(resetFromState);
+  }
+
+  destroy() {
+    remove(this.#waypointComponent);
+    remove(this.#waypointEditComponent);
   }
 
   #handleFavClick = () => {
@@ -66,15 +113,15 @@ export default class SingleWaypointPresenter {
   };
 
   #handleEditClick = () => {
-    this.replaceInfoToEdit();
+    this.#replaceInfoToEdit();
   };
 
   #formSubHandler = (point) => {
     this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, point);
-    this.replaceEditToInfo();
   };
 
   #formCancelHandler = () => {
+    this.#waypointEditComponent.reset(this.#elem);
     this.resetView();
   };
 
@@ -86,32 +133,21 @@ export default class SingleWaypointPresenter {
     if (evt.key === 'Escape') {
       evt.preventDefault();
       this.#waypointEditComponent.reset(this.#elem);
-      this.replaceEditToInfo();
+      this.#replaceEditToInfo();
       document.removeEventListener('keydown', this.#escDownHandler);
     }
   };
 
-  replaceEditToInfo() {
+  #replaceEditToInfo() {
     replace(this.#waypointComponent, this.#waypointEditComponent);
     document.removeEventListener('keydown', this.#escDownHandler);
     this.#state = Mode.CLOSED;
   }
 
-  replaceInfoToEdit() {
+  #replaceInfoToEdit() {
     replace(this.#waypointEditComponent, this.#waypointComponent);
     document.addEventListener('keydown', this.#escDownHandler);
     this.#handleModeChange();
     this.#state = Mode.OPENED;
-  }
-
-  destroy() {
-    remove(this.#waypointComponent);
-    remove(this.#waypointEditComponent);
-  }
-
-  resetView() {
-    if (this.#state !== Mode.CLOSED) {
-      this.replaceEditToInfo();
-    }
   }
 }

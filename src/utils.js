@@ -25,7 +25,6 @@ const countDates = (dateFrom, dateTo) => {
 
 const getRandomElem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// Dates sort
 function getWeight(optionA, optionB) {
   if (optionA === null && optionB === null) {
     return 0;
