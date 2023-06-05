@@ -1,28 +1,31 @@
-import { render, RenderPosition, remove } from '../framework/render.js';
 import TripInfoView from '../view/trip-info-view.js';
 import TripSortView from '../view/sorting-view.js';
-import { SortType, UpdateType, UserAction, FiltersType } from '../const.js';
-import { sortWaypointsByTime, sortWaypointsByPrice, filter } from '../utils.js';
 import EventsListView from '../view/events-list-view.js';
 import NotificationNewEventView from '../view/notification-new-event-view.js';
 import SingleWaypointPresenter from './single-waypoint-presenter.js';
 import FilterPresenter from './filter-presenter.js';
 import NewPointPresenter from './new-waypoint-presenter.js';
+import LoadingView from '../view/loading-view.js';
+import { SortType, UpdateType, UserAction, FiltersType } from '../const.js';
+import { render, RenderPosition, remove } from '../framework/render.js';
+import { sortWaypointsByTime, sortWaypointsByPrice, filter } from '../utils.js';
 
 export default class MainPresenter {
   #tripMain = null;
   #tripControlsFilters = null;
   #tripEventsSection = null;
   #sortComponent = null;
-  #currentSortType = SortType.DATE;
 
   #eventComponent = new EventsListView();
-  #notiComponent = null;
   #infoViewComponent = new TripInfoView();
+  #loadingComponent = new LoadingView();
+  #notiComponent = null;
   #waypointModel = null;
   #filterModel = null;
   #filterType = FiltersType.EVERYTHING;
 
+  #currentSortType = SortType.DATE;
+  #isLoading = true;
   #newPointPresenter = null;
   #pointPresenters = new Map();
 
@@ -47,6 +50,7 @@ export default class MainPresenter {
       waypointListContainer: this.#eventComponent.element,
       onDataChange: this.#handleViewAction,
       onDestroy: onPointDestroy,
+      waypointModel: this.#waypointModel,
     });
   }
 
@@ -106,15 +110,13 @@ export default class MainPresenter {
       pointsContainer: this.#eventComponent.element,
       onDataChange: this.#handleViewAction,
       onModeChange: this.#handleModeChange,
+      waypointModel: this.#waypointModel,
     });
     singleWaypointPresenter.init(waypoint);
     this.#pointPresenters.set(waypoint.id, singleWaypointPresenter);
   }
 
   #renderWaypoints() {
-    if (this.points.length === 0) {
-      this.#renderNoPoints();
-    }
     if (this.points.length) {
       render(
         this.#infoViewComponent,
@@ -124,6 +126,13 @@ export default class MainPresenter {
       this.#renderSortOptions();
     }
     render(this.#eventComponent, this.#tripEventsSection);
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+    if (this.points.length === 0) {
+      this.#renderNoPoints();
+    }
     this.points.forEach((point) => this.#renderWaypoint(point));
   }
 
@@ -132,6 +141,11 @@ export default class MainPresenter {
       filterType: this.#filterType,
     });
     render(this.#notiComponent, this.#eventComponent.element);
+    remove(this.#loadingComponent);
+  }
+
+  #renderLoading() {
+    render(this.#loadingComponent, this.#eventComponent.element);
   }
 
   #clearPoints() {
@@ -174,6 +188,11 @@ export default class MainPresenter {
         break;
       case UpdateType.MAJOR:
         this.#clearPoints({ resetSortType: true });
+        this.#renderWaypoints();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
         this.#renderWaypoints();
         break;
     }

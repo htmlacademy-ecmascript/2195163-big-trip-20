@@ -25,7 +25,7 @@ const countDates = (dateFrom, dateTo) => {
 
 const getRandomElem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-
+// Dates sort
 function getWeight(optionA, optionB) {
   if (optionA === null && optionB === null) {
     return 0;
@@ -82,6 +82,14 @@ const filter = {
     events.filter((oneEvent) => dayjs(oneEvent.dateTo).diff(new Date()) < ZERO),
 };
 
+function ucFirst(str) {
+  if (!str) {
+    return str;
+  }
+
+  return str[0].toUpperCase() + str.slice(1);
+}
+
 export {
   getRandomElem,
   humanizeDate,
@@ -92,4 +100,5 @@ export {
   sortWaypointsByPrice,
   isDatesEqual,
   filter,
+  ucFirst,
 };
