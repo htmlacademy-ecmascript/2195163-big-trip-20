@@ -58,7 +58,6 @@ export default class NewPointPresenter {
 
   #handleFormSubmit = (point) => {
     this.#handleDataChange(UserAction.ADD_POINT, UpdateType.MINOR, point);
-    this.destroy();
   };
 
   #handleCancelClick = () => {
@@ -71,4 +70,23 @@ export default class NewPointPresenter {
       this.destroy();
     }
   };
+
+  setSaving() {
+    this.#waypointEditComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFromState = () => {
+      this.#waypointEditComponent.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#waypointEditComponent.shake(resetFromState);
+  }
 }
