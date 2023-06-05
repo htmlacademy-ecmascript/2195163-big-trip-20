@@ -15,6 +15,18 @@ function createWaypointElement(data) {
     isFavourite,
   } = data;
 
+  const offersList = offers.length
+    ? offers
+      .map(
+        (elem) => /*html*/ `<li class="event__offer">
+    <span class="event__offer-title">${elem.title}</span>
+    &plus;&euro;
+    <span class="event__offer-price">${elem.price}</span>
+  </li>`
+      )
+      .join('')
+    : '';
+
   return /*html*/ `<li class="trip-events__item">
   <div class="event">
     <time class="event__date" datetime="2019-03-18">${humanizeDate(
@@ -44,11 +56,7 @@ function createWaypointElement(data) {
     </p>
     <h4 class="visually-hidden">Offers:</h4>
     <ul class="event__selected-offers">
-      <li class="event__offer">
-        <span class="event__offer-title">${offers[0].title}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offers[0].price}</span>
-      </li>
+     ${offersList}
     </ul>
     <button class="event__favorite-btn ${
   isFavourite ? 'event__favorite-btn--active' : ''

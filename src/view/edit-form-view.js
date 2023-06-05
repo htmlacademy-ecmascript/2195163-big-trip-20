@@ -1,29 +1,19 @@
-import { WAYPOINT_OPTIONS, TRAVEL_WAYPOINTS } from '../const.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { mapWaypoints, mapOptions } from '../mock/mocks.js';
-import { humanizeDate } from '../utils.js';
+import { humanizeDate, ucFirst } from '../utils.js';
 import flatpickr from 'flatpickr';
 import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
 
-const fillerData = {
-  basePrice: '0',
-  dateFrom: new Date(),
-  dateTo: new Date(),
-  destination: mapWaypoints.get('Tokyo'),
-  isFavourite: false,
-  offers: mapOptions.get(WAYPOINT_OPTIONS[0]),
-  type: WAYPOINT_OPTIONS[0],
-};
-
-function createEditForm(data, isNew) {
-  const { destination, offers, type, dateFrom, dateTo } = data;
+function createEditForm(data, isNew, model) {
+  const { destination, type, dateFrom, dateTo } = data;
   const pics =
     destination.pictures.length > 0
       ? `<div class="event__photos-container"><div class="event__photos-tape">
-  ${destination.pictures.map(
-    (elem) => `<img class="event__photo" src=${elem.src} alt="Event photo">`
-  )}
+  ${destination.pictures
+    .map(
+      (elem) => `<img class="event__photo" src=${elem.src} alt="Event photo">`
+    )
+    .join('')}
   </div></div>`
       : '';
   const rollupBtn = `<button class="event__rollup-btn" type="button">
@@ -44,12 +34,16 @@ function createEditForm(data, isNew) {
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
 
-    ${WAYPOINT_OPTIONS.map(
-    (elem) => `<div class="event__type-item">
-            <input id="event-type-${elem.toLocaleLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${elem.toLocaleLowerCase()}">
-            <label class="event__type-label  event__type-label--${elem.toLocaleLowerCase()}" for="event-type-${elem.toLocaleLowerCase()}-1">${elem}</label>
+    ${model.offers
+    .map(
+      (elem) => `<div class="event__type-item">
+            <input id="event-type-${elem.type.toLocaleLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${elem.type.toLocaleLowerCase()}">
+            <label class="event__type-label  event__type-label--${elem.type.toLocaleLowerCase()}" for="event-type-${elem.type.toLocaleLowerCase()}-1">${ucFirst(
+  elem.type
+)}</label>
           </div>`
-  ).join('')}
+    )
+    .join('')}
 
           </fieldset>
         </div>
@@ -63,7 +57,9 @@ function createEditForm(data, isNew) {
     `${destination.name}`
   )}" list="destination-list-1">
         <datalist id="destination-list-1">
-        ${TRAVEL_WAYPOINTS.map((elem) => `<option value="${elem}"></option>`)}
+        ${model.destinations.map(
+    (elem) => `<option value="${elem.name}"></option>`
+  )}
         </datalist>
       </div>
 
@@ -105,14 +101,14 @@ function createEditForm(data, isNew) {
       <section class="event__section  event__section--offers">
 
       ${
-  offers.length > 0
+  model.offers.length > 0
     ? '<h3 class="event__section-title  event__section-title--offers">Offers</h3>'
     : ''
 }
 
       ${
-  offers &&
-        `<div class="event__available-offers">${offers
+  model.offers &&
+        `<div class="event__available-offers">${model.offers
           .map(
             (elem) => `<div class="event__offer-selector">
       <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
@@ -146,17 +142,36 @@ export default class EditFormView extends AbstractStatefulView {
   #datepickerTo = null;
   #datepickerFrom = null;
   #handleDelete = null;
+  #waypointModel = null;
   #isNew = false;
 
   constructor({
-    waypoint = fillerData,
+    waypoint,
     onFormSubmit,
     onFormCancel,
     onFormDelete,
     isNew,
+    waypointModel,
   }) {
     super();
-    this._setState(EditFormView.parseWaypointToState(waypoint));
+    this.#waypointModel = waypointModel;
+    if (waypoint) {
+      this._setState(EditFormView.parseWaypointToState(waypoint));
+    } else {
+      const dateFrom = new Date();
+      dateFrom.setDate(dateFrom.getDate() - 2);
+      const fillerData = {
+        basePrice: 500,
+        dateFrom: dateFrom,
+        dateTo: new Date(),
+        destination: { ...this.#waypointModel.destinations[0] },
+        isFavourite: false,
+        offers: [...this.#waypointModel.offers[0].offers],
+        type: this.#waypointModel.offers[0].type,
+      };
+
+      this._setState(EditFormView.parseWaypointToState(fillerData));
+    }
     this.#handleSubmit = onFormSubmit;
     this.#handleCancel = onFormCancel;
     this.#handleDelete = onFormDelete;
@@ -166,7 +181,7 @@ export default class EditFormView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEditForm(this._state, this.#isNew);
+    return createEditForm(this._state, this.#isNew, this.#waypointModel);
   }
 
   removeElement() {
@@ -208,9 +223,15 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #formDestChangeHandler = (evt) => {
-    if (mapWaypoints.get(evt.target.value)) {
+    if (
+      this.#waypointModel.destinations.find(
+        (elem) => elem.name === evt.target.value
+      )
+    ) {
       this.updateElement({
-        destination: mapWaypoints.get(evt.target.value),
+        destination: this.#waypointModel.destinations.find(
+          (elem) => elem.name === evt.target.value
+        ),
       });
       this.element
         .querySelector('.event__save-btn')
@@ -240,7 +261,6 @@ export default class EditFormView extends AbstractStatefulView {
         this.element.querySelector('#event-start-time-1'),
         {
           enableTime: true,
-
           maxDate: this._state.dateTo,
           dateFormat: 'd/m/y H:i',
           defaultDate: this._state.dateFrom,
@@ -253,7 +273,6 @@ export default class EditFormView extends AbstractStatefulView {
         this.element.querySelector('#event-end-time-1'),
         {
           enableTime: true,
-
           minDate: this._state.dateFrom,
           dateFormat: 'd/m/y H:i',
           defaultDate: this._state.dateTo,

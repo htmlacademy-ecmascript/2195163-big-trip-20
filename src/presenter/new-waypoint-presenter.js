@@ -1,19 +1,25 @@
-import { remove, render, RenderPosition } from '../framework/render.js';
 import EditFormView from '../view/edit-form-view.js';
-import { nanoid } from 'nanoid';
+import { remove, render, RenderPosition } from '../framework/render.js';
 import { UserAction, UpdateType } from '../const.js';
 
 export default class NewPointPresenter {
   #waypointListContainer = null;
   #handleDataChange = null;
   #handleDestroy = null;
+  #waypointModel = null;
 
   #waypointEditComponent = null;
 
-  constructor({ waypointListContainer, onDataChange, onDestroy }) {
+  constructor({
+    waypointListContainer,
+    onDataChange,
+    onDestroy,
+    waypointModel,
+  }) {
     this.#waypointListContainer = waypointListContainer;
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
+    this.#waypointModel = waypointModel;
   }
 
   init() {
@@ -24,6 +30,7 @@ export default class NewPointPresenter {
     this.#waypointEditComponent = new EditFormView({
       onFormSubmit: this.#handleFormSubmit,
       onFormCancel: this.#handleCancelClick,
+      waypointModel: this.#waypointModel,
       isNew: true,
     });
 
@@ -50,10 +57,7 @@ export default class NewPointPresenter {
   }
 
   #handleFormSubmit = (point) => {
-    this.#handleDataChange(UserAction.ADD_POINT, UpdateType.MINOR, {
-      id: nanoid(),
-      ...point,
-    });
+    this.#handleDataChange(UserAction.ADD_POINT, UpdateType.MINOR, point);
     this.destroy();
   };
 
