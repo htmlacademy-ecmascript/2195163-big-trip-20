@@ -23,8 +23,8 @@ export default class MainPresenter {
   #tripEventsSection = null;
   #sortComponent = null;
 
+  #infoViewComponent = null;
   #eventComponent = new EventsListView();
-  #infoViewComponent = new TripInfoView();
   #loadingComponent = new LoadingView();
   #uiBlocker = new UiBlocker({
     lowerLimit: TimeLimit.LOWER_LIMIT,
@@ -86,6 +86,12 @@ export default class MainPresenter {
     return filteredPoints;
   }
 
+  createWaypoint() {
+    this.#currentSortType = SortType.DAY;
+    this.#filterModel.setFilter(UpdateType.MAJOR, FiltersType.EVERYTHING);
+    this.#newPointPresenter.init();
+  }
+
   #renderFilters() {
     const filtersPresenter = new FilterPresenter({
       filterContainer: this.#tripControlsFilters,
@@ -129,6 +135,9 @@ export default class MainPresenter {
   }
 
   #renderWaypoints() {
+    this.#infoViewComponent = new TripInfoView({
+      waypointModel: this.#waypointModel,
+    });
     if (this.points.length) {
       render(
         this.#infoViewComponent,
@@ -151,6 +160,7 @@ export default class MainPresenter {
   #renderNoPoints() {
     this.#notiComponent = new NotificationNewEventView({
       filterType: this.#filterType,
+      waypointModel: this.#waypointModel,
     });
     render(this.#notiComponent, this.#eventComponent.element);
     remove(this.#loadingComponent);
@@ -160,10 +170,14 @@ export default class MainPresenter {
     render(this.#loadingComponent, this.#eventComponent.element);
   }
 
-  #clearPoints() {
+  #clearPoints(resetSortType = false) {
     this.#newPointPresenter.destroy();
     this.#pointPresenters.forEach((presenter) => presenter.destroy());
     this.#pointPresenters.clear();
+
+    if (resetSortType === true) {
+      this.#currentSortType = SortType.DAY;
+    }
 
     remove(this.#notiComponent);
     remove(this.#infoViewComponent);
@@ -207,17 +221,21 @@ export default class MainPresenter {
     this.#uiBlocker.unblock();
   };
 
+  #rerenderList = () => {
+    this.#clearPoints();
+    this.#renderWaypoints();
+  };
+
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
         this.#pointPresenters.get(data.id).init(data);
         break;
       case UpdateType.MINOR:
-        this.#clearPoints();
-        this.#renderWaypoints();
+        this.#rerenderList();
         break;
       case UpdateType.MAJOR:
-        this.#clearPoints({ resetSortType: true });
+        this.#clearPoints(true);
         this.#renderWaypoints();
         break;
       case UpdateType.INIT:
@@ -227,10 +245,4 @@ export default class MainPresenter {
         break;
     }
   };
-
-  createWaypoint() {
-    this.#currentSortType = SortType.DAY;
-    this.#filterModel.setFilter(UpdateType.MAJOR, FiltersType.EVERYTHING);
-    this.#newPointPresenter.init();
-  }
 }

@@ -36,6 +36,7 @@ export default class FilterPresenter {
       filters,
       currentFilterType: this.#filterModel.filter,
       onFilterTypeChange: this.#handleFilterTypeChange,
+      waypointModel: this.#waypointsModel,
     });
 
     if (prevFilterComponent === null) {

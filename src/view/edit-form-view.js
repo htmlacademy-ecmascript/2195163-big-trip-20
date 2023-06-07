@@ -6,7 +6,6 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 function createEditForm(data, isNew, model) {
   const { destination, type, dateFrom, dateTo } = data;
-
   const pics =
     destination.pictures.length > 0
       ? `<div class="event__photos-container"><div class="event__photos-tape">
@@ -22,15 +21,21 @@ function createEditForm(data, isNew, model) {
   <span class="visually-hidden">Open event</span>
 </button>`;
 
-  const offersModelInfo = model.offers.find((tip) => tip.type === type);
+  const offersModelInfo = model.offers.find((option) => option.type === type);
   const deleteCase = data.isDeleting ? 'Deleting...' : 'Delete';
 
   const offersList = offersModelInfo.offers.length
     ? `<div class="event__available-offers">${offersModelInfo.offers
       .map(
         (elem) => `<div class="event__offer-selector">
-<input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage">
-<label class="event__offer-label" for="event-offer-luggage-1">
+<input class="event__offer-checkbox  visually-hidden" id="event-offer-${elem.title
+    .replaceAll(' ', '')
+    .toLowerCase()}-1" type="checkbox"  data-offer-id="${
+  elem.id
+}" name="event-offer-${elem.title.replaceAll(' ', '').toLowerCase()}">
+<label class="event__offer-label" for="event-offer-${elem.title
+    .replaceAll(' ', '')
+    .toLowerCase()}-1" >
   <span class="event__offer-title">${elem.title}</span>
   &plus;&euro;&nbsp;
   <span class="event__offer-price">${elem.price}</span>
@@ -39,7 +44,6 @@ function createEditForm(data, isNew, model) {
       )
       .join('')}</div>`
     : '';
-
   return /*html*/ `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
@@ -57,7 +61,9 @@ function createEditForm(data, isNew, model) {
     ${model.offers
     .map(
       (elem) => `<div class="event__type-item">
-            <input id="event-type-${elem.type.toLocaleLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${elem.type.toLocaleLowerCase()}">
+            <input id="event-type-${elem.type.toLocaleLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${elem.type.toLocaleLowerCase()}" ${
+  elem.type === type ? 'checked' : ''
+}>
             <label class="event__type-label  event__type-label--${elem.type.toLocaleLowerCase()}" for="event-type-${elem.type.toLocaleLowerCase()}-1">${ucFirst(
   elem.type
 )}</label>
@@ -103,7 +109,7 @@ function createEditForm(data, isNew, model) {
           &euro;
         </label>
         <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${he.encode(
-    ''
+    `${data.basePrice}`
   )}">
       </div>
 
@@ -116,8 +122,6 @@ function createEditForm(data, isNew, model) {
 
       ${isNew ? '' : rollupBtn}
     </header>
-
-
 
     <section class="event__details">
       <section class="event__section  event__section--offers">
@@ -133,7 +137,12 @@ function createEditForm(data, isNew, model) {
       </section>
 
       <section class="event__section  event__section--destination">
-        <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+      ${
+  destination.name
+    ? '<h3 class="event__section-title  event__section-title--destination">Destination</h3>'
+    : ''
+}
+
         <p class="event__destination-description">${destination.description}</p>
 
         ${isNew ? pics : ''}
@@ -165,14 +174,19 @@ export default class EditFormView extends AbstractStatefulView {
     this.#waypointModel = waypointModel;
     if (waypoint) {
       this._setState(EditFormView.parseWaypointToState(waypoint));
+
     } else {
       const dateFrom = new Date();
       dateFrom.setDate(dateFrom.getDate() - 2);
       const fillerData = {
-        basePrice: 500,
+        basePrice: '',
         dateFrom: dateFrom,
         dateTo: new Date(),
-        destination: { ...this.#waypointModel.destinations[0] },
+        destination: {
+          name: '',
+          pictures: [],
+          description: '',
+        },
         isFavourite: false,
         offers: [...this.#waypointModel.offers[0].offers],
         type: this.#waypointModel.offers[0].type,
@@ -206,6 +220,10 @@ export default class EditFormView extends AbstractStatefulView {
     }
   }
 
+  reset(waypoint) {
+    this.updateElement(EditFormView.parseWaypointToState(waypoint));
+  }
+
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#handleSubmit(EditFormView.parseStateToWaypoint(this._state));
@@ -225,6 +243,7 @@ export default class EditFormView extends AbstractStatefulView {
     if (evt.target.tagName === 'INPUT') {
       this.updateElement({
         type: evt.target.value,
+        offers: [],
       });
     }
   };
@@ -250,13 +269,49 @@ export default class EditFormView extends AbstractStatefulView {
     }
   };
 
+  #formPriceChangeHandler = (evt) => {
+    this.updateElement({
+      basePrice: Number(evt.target.value),
+    });
+  };
+
   #fromDateSubmitHandler = ([userDateFrom]) => {
+    if (userDateFrom === undefined) {
+      this.#setDatepicker();
+      return;
+    }
     this.updateElement({
       dateFrom: userDateFrom,
     });
   };
 
+  #offerClickHandler = (evt) => {
+    evt.preventDefault();
+
+    const checkedBoxes = Array.from(
+      this.element.querySelectorAll('.event__offer-checkbox:checked')
+    );
+
+    this.updateElement({
+      waypoint: {
+        offers: checkedBoxes.map((elem) => elem.dataset.offerId),
+      },
+    });
+
+    document.querySelectorAll('.event__offer-checkbox').forEach((elem) => {
+      if (
+        this._state.waypoint.offers.find((el) => el === elem.dataset.offerId)
+      ) {
+        elem.setAttribute('checked', true);
+      }
+    });
+  };
+
   #toDateSubmitHandler = ([userDateTo]) => {
+    if (userDateTo === undefined) {
+      this.#setDatepicker();
+      return;
+    }
     this.updateElement({
       dateTo: userDateTo,
     });
@@ -268,6 +323,7 @@ export default class EditFormView extends AbstractStatefulView {
         this.element.querySelector('#event-start-time-1'),
         {
           enableTime: true,
+          time_24hr: true, // eslint-disable-line
           maxDate: this._state.dateTo,
           dateFormat: 'd/m/y H:i',
           defaultDate: this._state.dateFrom,
@@ -280,6 +336,7 @@ export default class EditFormView extends AbstractStatefulView {
         this.element.querySelector('#event-end-time-1'),
         {
           enableTime: true,
+          time_24hr: true, // eslint-disable-line
           minDate: this._state.dateFrom,
           dateFormat: 'd/m/y H:i',
           defaultDate: this._state.dateTo,
@@ -313,11 +370,17 @@ export default class EditFormView extends AbstractStatefulView {
     this.element
       .querySelector('.event__input--destination')
       .addEventListener('change', this.#formDestChangeHandler);
-    this.#setDatepicker();
-  }
+    this.element
+      .querySelector('.event__input--price')
+      .addEventListener('change', this.#formPriceChangeHandler);
 
-  reset(waypoint) {
-    this.updateElement(EditFormView.parseWaypointToState(waypoint));
+    if (this.element.querySelector('.event__available-offers')) {
+      this.element
+        .querySelector('.event__available-offers')
+        .addEventListener('change', this.#offerClickHandler);
+    }
+
+    this.#setDatepicker();
   }
 
   static parseStateToWaypoint(waypoint) {
@@ -325,7 +388,6 @@ export default class EditFormView extends AbstractStatefulView {
     delete point.isDisabled;
     delete point.isSaving;
     delete point.isDeleting;
-
     return point;
   }
 

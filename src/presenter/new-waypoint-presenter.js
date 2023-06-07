@@ -56,21 +56,6 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
-  #handleFormSubmit = (point) => {
-    this.#handleDataChange(UserAction.ADD_POINT, UpdateType.MINOR, point);
-  };
-
-  #handleCancelClick = () => {
-    this.destroy();
-  };
-
-  #escKeyDownHandler = (evt) => {
-    if (evt.key === 'Escape' || evt.key === 'Esc') {
-      evt.preventDefault();
-      this.destroy();
-    }
-  };
-
   setSaving() {
     this.#waypointEditComponent.updateElement({
       isDisabled: true,
@@ -89,4 +74,19 @@ export default class NewPointPresenter {
 
     this.#waypointEditComponent.shake(resetFromState);
   }
+
+  #handleFormSubmit = (point) => {
+    this.#handleDataChange(UserAction.ADD_POINT, UpdateType.MINOR, point);
+  };
+
+  #handleCancelClick = () => {
+    this.destroy();
+  };
+
+  #escKeyDownHandler = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      this.destroy();
+    }
+  };
 }
