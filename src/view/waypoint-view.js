@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { humanizeDate, countDates } from '../utils.js';
+import { humanizeDate, humanizeDuration } from '../utils.js';
 
 const HOURS_MINS = 'HH:mm';
 const DAYS_MONTH = 'MMM DD';
@@ -49,7 +49,7 @@ function createWaypointElement(data) {
     HOURS_MINS
   )}</time>
       </p>
-      <p class="event__duration">${countDates(dateFrom, dateTo)}</p>
+      <p class="event__duration">${humanizeDuration(dateFrom, dateTo)}</p>
     </div>
     <p class="event__price">
       &euro;&nbsp;<span class="event__price-value">${basePrice}</span>

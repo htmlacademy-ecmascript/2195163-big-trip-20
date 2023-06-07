@@ -1,4 +1,9 @@
-export const FILTERS_OPTIONS = ['Everything', 'Future', 'Present', 'Past'];
+export const FILTERS_OPTIONS = [
+  'Everything',
+  'Future',
+  'Present',
+  'Past'
+];
 
 export const Mode = {
   OPENED: 'opened',
@@ -34,7 +39,7 @@ export const UpdateType = {
 };
 
 export const Urls = {
-  MAIN: 'https://20.objects.pages.academy/big-trip',
+  MAIN: 'https://20.ecmascript.pages.academy/big-trip',
   POINTS: 'points',
   DESTINATIONS: 'destinations',
   OFFERS: 'offers',
@@ -47,7 +52,7 @@ export const Method = {
   POST: 'POST',
 };
 
-export const AUTHORIZATION = 'Basic erth324512saa';
+export const AUTHORIZATION = 'Basic erth324512saaabv';
 
 export const TimeLimit = {
   LOWER_LIMIT: 350,
