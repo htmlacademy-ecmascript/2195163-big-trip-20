@@ -8,7 +8,7 @@ const NoEventsTextType = {
   [FiltersType.PRESENT]: 'There are no present events now',
 };
 
-function createNotification(filterType, model) {
+const createNotification = (filterType, model) => {
   const noEventsTextValue = NoEventsTextType[filterType];
   const isOffersOrDestinationsEmpty =
     !model.offers.length || !model.destinations.length;
@@ -20,7 +20,7 @@ function createNotification(filterType, model) {
     : noEventsTextValue
 }
   </p>`;
-}
+};
 
 export default class NotificationNewEventView extends AbstractView {
   #filterType = null;

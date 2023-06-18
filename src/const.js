@@ -38,7 +38,7 @@ export const UpdateType = {
   INIT: 'INIT',
 };
 
-export const Urls = {
+export const Url = {
   MAIN: 'https://20.ecmascript.pages.academy/big-trip',
   POINTS: 'points',
   DESTINATIONS: 'destinations',
@@ -57,4 +57,10 @@ export const AUTHORIZATION = 'Basic erth324512saaabv';
 export const TimeLimit = {
   LOWER_LIMIT: 350,
   UPPER_LIMIT: 1000,
+};
+
+export const ElementsStatus = {
+  DISABLED: 'disabled',
+  CHECKED: 'checked',
+  ACTIVE: '--active'
 };

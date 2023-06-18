@@ -4,23 +4,23 @@ import FilterModel from './model/filter-model.js';
 import NewEventButtonView from './view/new-event-button-view.js';
 import PointsApiService from './points-api-service.js';
 import { render } from './framework/render.js';
-import { Urls, AUTHORIZATION } from './const.js';
+import { Url, AUTHORIZATION } from './const.js';
 
 const tripMainElement = document.querySelector('.trip-main');
 const tripControlsFiltersElement = document.querySelector(
   '.trip-controls__filters'
 );
-const tripEventsSection = document.querySelector('.trip-events');
+const tripEventsElement = document.querySelector('.trip-events');
 
 const waypointModel = new WaypointModel({
-  pointsApiService: new PointsApiService(Urls.MAIN, AUTHORIZATION),
-  handleError: unableNewTaskButton,
+  pointsApiService: new PointsApiService(Url.MAIN, AUTHORIZATION),
+  handleError: handleNewTaskFormUnable,
 });
 const filterModel = new FilterModel();
 const mainPresenter = new MainPresenter({
   tripMain: tripMainElement,
   tripControlsFiltres: tripControlsFiltersElement,
-  tripEventsSection: tripEventsSection,
+  tripEventsElement: tripEventsElement,
   waypointModel,
   filterModel,
   onPointDestroy: handleNewTaskFormClose,
@@ -34,7 +34,7 @@ function handleNewTaskFormClose() {
   newPointButtonComponent.element.disabled = false;
 }
 
-function unableNewTaskButton() {
+function handleNewTaskFormUnable() {
   newPointButtonComponent.element.disabled = true;
 }
 

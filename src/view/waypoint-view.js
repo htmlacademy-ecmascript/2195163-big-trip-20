@@ -4,7 +4,7 @@ import { humanizeDate, humanizeDuration } from '../utils.js';
 const HOURS_MINS = 'HH:mm';
 const DAYS_MONTH = 'MMM DD';
 
-function createWaypointElement(data) {
+const createWaypointElement = (data) => {
   const {
     basePrice,
     dateFrom,
@@ -14,9 +14,10 @@ function createWaypointElement(data) {
     type,
     isFavourite,
   } = data;
+  const offersModelInfo = offers;
 
-  const offersList = offers.length
-    ? offers
+  const offersList = offersModelInfo.length
+    ? offersModelInfo
       .map(
         (elem) => /*html*/ `<li class="event__offer">
     <span class="event__offer-title">${elem.title}</span>
@@ -71,14 +72,14 @@ function createWaypointElement(data) {
     </button>
   </div>
 </li>`;
-}
+};
 
 export default class WaypointView extends AbstractStatefulView {
   #onEditClick = null;
   #handleFavourite = null;
-
   constructor({ waypoint, onEditClick, handleFavourite }) {
     super();
+
     this._setState(waypoint);
     this.#onEditClick = onEditClick;
     this.#handleFavourite = handleFavourite;
@@ -90,15 +91,6 @@ export default class WaypointView extends AbstractStatefulView {
     return createWaypointElement(this._state);
   }
 
-  #onClickEvt = (evt) => {
-    evt.preventDefault();
-    this.#onEditClick();
-  };
-
-  #onFavEvt = () => {
-    this.#handleFavourite();
-  };
-
   _restoreHandlers() {
     this.element
       .querySelector('.event__rollup-btn')
@@ -108,6 +100,15 @@ export default class WaypointView extends AbstractStatefulView {
       .querySelector('.event__favorite-btn')
       .addEventListener('click', this.#onFavEvt);
   }
+
+  #onClickEvt = (evt) => {
+    evt.preventDefault();
+    this.#onEditClick();
+  };
+
+  #onFavEvt = () => {
+    this.#handleFavourite();
+  };
 
   static parseWaypointToState(waypoint) {
     return waypoint;
