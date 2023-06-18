@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { FILTERS_OPTIONS } from '../const.js';
 import { filter } from '../utils.js';
 
-function createTripFiltersElement({ currentFilter, model }) {
+const createTripFiltersElement = ({ currentFilter, model }) => {
   const filtersList = FILTERS_OPTIONS.map(
     (elem) => /*html*/ `<div class="trip-filters__filter">
       <input
@@ -26,7 +26,7 @@ function createTripFiltersElement({ currentFilter, model }) {
         Accept filter
       </button>
     </form>`;
-}
+};
 
 export default class TripFiltersView extends AbstractView {
   #filters = null;

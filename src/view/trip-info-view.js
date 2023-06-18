@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import dayjs from 'dayjs';
 import { humanizeDate } from '../utils.js';
 
-function createTripInfoElement(model) {
+const createTripInfoElement = (model) => {
   if (model.points.length) {
     const firstPointName = model.points[0].destination.name;
     const lastPointName =
@@ -54,7 +54,7 @@ function createTripInfoElement(model) {
       Total: &euro;&nbsp;<span class="trip-info__cost-value"></span>
     </p>
   </section>`;
-}
+};
 
 export default class TripInfoView extends AbstractView {
   #waypointModel = null;

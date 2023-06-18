@@ -20,7 +20,7 @@ import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
 export default class MainPresenter {
   #tripMain = null;
   #tripControlsFilters = null;
-  #tripEventsSection = null;
+  #tripEventsElement = null;
   #sortComponent = null;
 
   #infoViewComponent = null;
@@ -44,14 +44,14 @@ export default class MainPresenter {
   constructor({
     tripMain,
     tripControlsFiltres,
-    tripEventsSection,
+    tripEventsElement,
     waypointModel,
     filterModel,
     onPointDestroy,
   }) {
     this.#tripMain = tripMain;
     this.#tripControlsFilters = tripControlsFiltres;
-    this.#tripEventsSection = tripEventsSection;
+    this.#tripEventsElement = tripEventsElement;
 
     this.#waypointModel = waypointModel;
     this.#waypointModel.addObserver(this.#handleModelEvent);
@@ -64,10 +64,6 @@ export default class MainPresenter {
       onDestroy: onPointDestroy,
       waypointModel: this.#waypointModel,
     });
-  }
-
-  init() {
-    this.#renderTripInfo();
   }
 
   get points() {
@@ -86,6 +82,10 @@ export default class MainPresenter {
     return filteredPoints;
   }
 
+  init() {
+    this.#renderTripInfo();
+  }
+
   createWaypoint() {
     this.#currentSortType = SortType.DAY;
     this.#filterModel.setFilter(UpdateType.MAJOR, FiltersType.EVERYTHING);
@@ -101,26 +101,12 @@ export default class MainPresenter {
     filtersPresenter.init();
   }
 
-  #handleModeChange = () => {
-    this.#newPointPresenter.destroy();
-    this.#pointPresenters.forEach((presenter) => presenter.resetView());
-  };
-
-  #handleSortTypeChange = (sortType) => {
-    if (this.#currentSortType === sortType) {
-      return;
-    }
-    this.#currentSortType = sortType;
-    this.#clearPoints();
-    this.#renderWaypoints(this.points);
-  };
-
   #renderSortOptions() {
     this.#sortComponent = new TripSortView({
       currentSortType: this.#currentSortType,
       onSortTypeChange: this.#handleSortTypeChange,
     });
-    render(this.#sortComponent, this.#tripEventsSection);
+    render(this.#sortComponent, this.#tripEventsElement);
   }
 
   #renderWaypoint(waypoint) {
@@ -146,7 +132,7 @@ export default class MainPresenter {
       );
       this.#renderSortOptions();
     }
-    render(this.#eventComponent, this.#tripEventsSection);
+    render(this.#eventComponent, this.#tripEventsElement);
     if (this.#isLoading) {
       this.#renderLoading();
       return;
@@ -189,6 +175,11 @@ export default class MainPresenter {
     this.#renderWaypoints();
   }
 
+  #rerenderList = () => {
+    this.#clearPoints();
+    this.#renderWaypoints();
+  };
+
   #handleViewAction = async (actionType, updateType, update) => {
     this.#uiBlocker.block();
 
@@ -221,9 +212,18 @@ export default class MainPresenter {
     this.#uiBlocker.unblock();
   };
 
-  #rerenderList = () => {
+  #handleModeChange = () => {
+    this.#newPointPresenter.destroy();
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+    this.#currentSortType = sortType;
     this.#clearPoints();
-    this.#renderWaypoints();
+    this.#renderWaypoints(this.points);
   };
 
   #handleModelEvent = (updateType, data) => {

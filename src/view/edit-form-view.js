@@ -4,7 +4,7 @@ import flatpickr from 'flatpickr';
 import he from 'he';
 import 'flatpickr/dist/flatpickr.min.css';
 
-function createEditForm(data, isNew, model) {
+const createEditForm = (data, isNew, model) => {
   const { destination, type, dateFrom, dateTo } = data;
   const pics =
     destination.pictures.length > 0
@@ -23,6 +23,10 @@ function createEditForm(data, isNew, model) {
 
   const offersModelInfo = model.offers.find((option) => option.type === type);
   const deleteCase = data.isDeleting ? 'Deleting...' : 'Delete';
+  if (!('waypoint' in data)) {
+    data.waypoint = { offers: data.offers.map((elem) => elem.id)};
+  }
+  const offersItem = data.waypoint.offers;
 
   const offersList = offersModelInfo.offers.length
     ? `<div class="event__available-offers">${offersModelInfo.offers
@@ -32,7 +36,9 @@ function createEditForm(data, isNew, model) {
     .replaceAll(' ', '')
     .toLowerCase()}-1" type="checkbox"  data-offer-id="${
   elem.id
-}" name="event-offer-${elem.title.replaceAll(' ', '').toLowerCase()}">
+}" name="event-offer-${elem.title.replaceAll(' ', '').toLowerCase()}" ${
+  offersItem.includes(elem.id) ? 'checked' : ''
+}>
 <label class="event__offer-label" for="event-offer-${elem.title
     .replaceAll(' ', '')
     .toLowerCase()}-1" >
@@ -80,7 +86,7 @@ function createEditForm(data, isNew, model) {
           ${type}
         </label>
         <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(
-    `${destination.name}`
+    destination.name
   )}" list="destination-list-1">
         <datalist id="destination-list-1">
         ${model.destinations.map(
@@ -145,13 +151,13 @@ function createEditForm(data, isNew, model) {
 
         <p class="event__destination-description">${destination.description}</p>
 
-        ${isNew ? pics : ''}
+        ${data ? pics : ''}
 
       </section>
     </section>
   </form>
 </li>`;
-}
+};
 
 export default class EditFormView extends AbstractStatefulView {
   #handleSubmit = null;
@@ -204,6 +210,43 @@ export default class EditFormView extends AbstractStatefulView {
 
   get template() {
     return createEditForm(this._state, this.#isNew, this.#waypointModel);
+  }
+
+  _restoreHandlers() {
+    if (this.element.querySelector('.event__rollup-btn')) {
+      this.element
+        .querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#formCancelHandler);
+    }
+    this.element
+      .querySelector('.event__save-btn')
+      .addEventListener('click', this.#formSubmitHandler);
+    if (this.element.querySelector('.event__rollup-btn')) {
+      this.element
+        .querySelector('.event__reset-btn')
+        .addEventListener('click', this.#formDeleteHandler);
+    } else {
+      this.element
+        .querySelector('.event__reset-btn')
+        .addEventListener('click', this.#formCancelHandler);
+    }
+    this.element
+      .querySelector('.event__type-group')
+      .addEventListener('click', this.#formEventChangeHandler);
+    this.element
+      .querySelector('.event__input--destination')
+      .addEventListener('change', this.#formDestChangeHandler);
+    this.element
+      .querySelector('.event__input--price')
+      .addEventListener('change', this.#formPriceChangeHandler);
+
+    if (this.element.querySelector('.event__available-offers')) {
+      this.element
+        .querySelector('.event__available-offers')
+        .addEventListener('change', this.#offerClickHandler);
+    }
+
+    this.#setDatepicker();
   }
 
   removeElement() {
@@ -344,43 +387,6 @@ export default class EditFormView extends AbstractStatefulView {
         }
       );
     }
-  }
-
-  _restoreHandlers() {
-    if (this.element.querySelector('.event__rollup-btn')) {
-      this.element
-        .querySelector('.event__rollup-btn')
-        .addEventListener('click', this.#formCancelHandler);
-    }
-    this.element
-      .querySelector('.event__save-btn')
-      .addEventListener('click', this.#formSubmitHandler);
-    if (this.element.querySelector('.event__rollup-btn')) {
-      this.element
-        .querySelector('.event__reset-btn')
-        .addEventListener('click', this.#formDeleteHandler);
-    } else {
-      this.element
-        .querySelector('.event__reset-btn')
-        .addEventListener('click', this.#formCancelHandler);
-    }
-    this.element
-      .querySelector('.event__type-group')
-      .addEventListener('click', this.#formEventChangeHandler);
-    this.element
-      .querySelector('.event__input--destination')
-      .addEventListener('change', this.#formDestChangeHandler);
-    this.element
-      .querySelector('.event__input--price')
-      .addEventListener('change', this.#formPriceChangeHandler);
-
-    if (this.element.querySelector('.event__available-offers')) {
-      this.element
-        .querySelector('.event__available-offers')
-        .addEventListener('change', this.#offerClickHandler);
-    }
-
-    this.#setDatepicker();
   }
 
   static parseStateToWaypoint(waypoint) {
