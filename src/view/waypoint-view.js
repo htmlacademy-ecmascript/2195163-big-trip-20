@@ -77,10 +77,9 @@ const createWaypointElement = (data) => {
 export default class WaypointView extends AbstractStatefulView {
   #onEditClick = null;
   #handleFavourite = null;
-  #waypointModel = null;
-  constructor({ waypoint, onEditClick, handleFavourite, waypointModel }) {
+  constructor({ waypoint, onEditClick, handleFavourite }) {
     super();
-    this.#waypointModel = waypointModel;
+
     this._setState(waypoint);
     this.#onEditClick = onEditClick;
     this.#handleFavourite = handleFavourite;
