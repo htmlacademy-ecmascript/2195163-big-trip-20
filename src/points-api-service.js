@@ -1,79 +1,71 @@
 import ApiService from './framework/api-service.js';
-import { Url, Method } from './const.js';
+
+const Method = {
+  PUT: 'PUT',
+  GET: 'GET',
+  POST: 'POST',
+  DELETE: 'DELETE'
+};
 
 export default class PointsApiService extends ApiService {
-  get points() {
-    return this._load({ url: Url.POINTS }).then(ApiService.parseResponse);
-  }
+  getPoints = () =>
+    this._load({url: 'points'})
+      .then(ApiService.parseResponse);
 
-  get destinations() {
-    return this._load({ url: Url.DESTINATIONS }).then(
-      ApiService.parseResponse
-    );
-  }
+  getOffers = () =>
+    this._load({url: 'offers'})
+      .then(ApiService.parseResponse);
 
-  get offers() {
-    return this._load({ url: Url.OFFERS }).then(ApiService.parseResponse);
-  }
+  getDestinations = () =>
+    this._load({url: 'destinations'})
+      .then(ApiService.parseResponse);
 
-  async updatePoint(newPoint) {
+  addPoint = async (point) => {
     const response = await this._load({
-      url: `${Url.POINTS}/${newPoint.id}`,
-      method: Method.PUT,
-      body: JSON.stringify(this.#adaptToServer(newPoint)),
-      headers: new Headers({ 'Content-Type': 'application/json' }),
-    });
-
-    const parsedResponse = await ApiService.parseResponse(response);
-
-    return parsedResponse;
-  }
-
-  async addPoint(point) {
-    const response = await this._load({
-      url: `${Url.POINTS}`,
+      url: 'points',
       method: Method.POST,
       body: JSON.stringify(this.#adaptToServer(point)),
-      headers: new Headers({ 'Content-Type': 'application/json' }),
+      headers: new Headers({'Content-Type': 'Application/json'})
     });
 
-    const parsedResponse = await ApiService.parseResponse(response);
+    return await ApiService.parseResponse(response);
+  };
 
-    return parsedResponse;
-  }
-
-  async deletePoint(point) {
-    const response = await this._load({
-      url: `${Url.POINTS}/${point.id}`,
+  deletePoint = async (point) =>
+    await this._load({
+      url: `points/${point.id}`,
       method: Method.DELETE,
     });
 
-    return response;
-  }
+  updatePoint = async (point) => {
+    const response = await this._load({
+      url: `points/${point.id}`,
+      method: Method.PUT,
+      body: JSON.stringify(this.#adaptToServer(point)),
+      headers: new Headers({'Content-Type': 'application/json'}),
+    });
 
-  #adaptToServer(point) {
+    return await ApiService.parseResponse(response);
+  };
+
+  #adaptToServer = (point) => {
     const adaptedPoint = {
       ...point,
-      'base_price': point.basePrice,
-      'date_from':
-        point.dateFrom instanceof Date ? point.dateFrom.toISOString() : null,
-      'date_to': point.dateTo instanceof Date ? point.dateTo.toISOString() : null,
-      'is_favorite': point.isFavourite,
+      'type': point.eventType,
+      'destination': point.destinationId,
+      'base_price': +point.basePrice,
+      'date_from': point.dateFrom,
+      'date_to': point.dateTo,
+      'is_favorite': point.isFavorite ?? false,
     };
 
-    adaptedPoint.destination = adaptedPoint.destination.id;
-
-    if (adaptedPoint.waypoint.offers.length) {
-      adaptedPoint.offers = adaptedPoint.waypoint.offers;
-    }
-
-
-    delete adaptedPoint.isFavourite;
-    delete adaptedPoint.dateTo;
-    delete adaptedPoint.dateFrom;
+    delete adaptedPoint.eventType;
+    delete adaptedPoint.destinationId;
     delete adaptedPoint.basePrice;
-    delete adaptedPoint.waypoint;
+    delete adaptedPoint.dateFrom;
+    delete adaptedPoint.dateTo;
+    delete adaptedPoint.isFavorite;
 
     return adaptedPoint;
-  }
+  };
 }
