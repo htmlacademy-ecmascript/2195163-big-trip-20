@@ -1,49 +1,34 @@
-import MainPresenter from './presenter/main-presenter.js';
-import WaypointModel from './model/waypoint-model.js';
-import FilterModel from './model/filter-model.js';
-import NewEventButtonView from './view/new-event-button-view.js';
+import BoardPresenter from './presenter/board-presenter.js';
+import PointsModel from './model/points-model.js';
+import FilterModel from './model/filters-model.js';
 import PointsApiService from './points-api-service.js';
-import { render } from './framework/render.js';
-import { Url, AUTHORIZATION } from './const.js';
+import FiltersPresenter from './presenter/filters-presenter.js';
 
-const tripMainElement = document.querySelector('.trip-main');
-const tripControlsFiltersElement = document.querySelector(
+const AUTHORIZATION = 'Basic erth324512saaabv';
+const END_POINT = 'https://20.ecmascript.pages.academy/big-trip';
+
+const filtersControlsElement = document.querySelector(
   '.trip-controls__filters'
 );
-const tripEventsElement = document.querySelector('.trip-events');
+const tripEventsContainer = document.querySelector('.trip-events');
 
-const waypointModel = new WaypointModel({
-  pointsApiService: new PointsApiService(Url.MAIN, AUTHORIZATION),
-  handleError: handleNewTaskFormUnable,
+const pointsModel = new PointsModel({
+  pointsApiService: new PointsApiService(END_POINT, AUTHORIZATION),
 });
-const filterModel = new FilterModel();
-const mainPresenter = new MainPresenter({
-  tripMain: tripMainElement,
-  tripControlsFiltres: tripControlsFiltersElement,
-  tripEventsElement: tripEventsElement,
-  waypointModel,
-  filterModel,
-  onPointDestroy: handleNewTaskFormClose,
+const filtersModel = new FilterModel();
+
+const boardPresenter = new BoardPresenter({
+  bodyContainer: tripEventsContainer,
+  pointsModel,
+  filtersModel,
 });
 
-const newPointButtonComponent = new NewEventButtonView({
-  onClick: handleNewTaskButtonClick,
+const filtersPresenter = new FiltersPresenter({
+  filterContainer: filtersControlsElement,
+  filtersModel,
+  pointsModel,
 });
 
-function handleNewTaskFormClose() {
-  newPointButtonComponent.element.disabled = false;
-}
-
-function handleNewTaskFormUnable() {
-  newPointButtonComponent.element.disabled = true;
-}
-
-function handleNewTaskButtonClick() {
-  mainPresenter.createWaypoint();
-  newPointButtonComponent.element.disabled = true;
-}
-
-mainPresenter.init();
-waypointModel.init().finally(() => {
-  render(newPointButtonComponent, tripMainElement);
-});
+filtersPresenter.init();
+boardPresenter.init();
+pointsModel.init();

@@ -1,100 +1,50 @@
 import dayjs from 'dayjs';
-import { FiltersType } from './const';
+import { getTimeDiff } from './time.js';
 
-const ZERO = 0;
+const getById = (searchedId, list) =>
+  list.find((currentElement) => currentElement.id === searchedId);
 
-const humanizeDate = (anyDate, dateFormat) =>
-  anyDate ? dayjs(anyDate).format(dateFormat) : '';
-
-const humanizeDuration = (dateFrom, dateTo) => {
-  const daysDiff = dayjs(dateTo).diff(dayjs(dateFrom), 'day', true);
-  const days = Math.floor(daysDiff);
-  const hoursDiff = dayjs(dateTo).diff(dayjs(dateFrom), 'hour', true);
-  const hoursAll = Math.floor(hoursDiff);
-  const hours = Math.floor((daysDiff - days) * 24);
-  const minutes = Math.floor((hoursDiff - hoursAll) * 60);
-  if (days === 0 && hours === 0) {
-    return `${minutes}M`;
-  }
-  if (days === 0) {
-    return `${hours}H ${minutes}M`;
-  }
-
-  return `${days}D ${hours}H ${minutes}M`;
-};
-
-function getWeight(optionA, optionB) {
-  if (optionA === null && optionB === null) {
-    return 0;
-  }
-
-  if (optionA === null) {
-    return 1;
-  }
-
-  if (optionB === null) {
-    return -1;
-  }
-
-  return null;
-}
-
-function sortWaypointsByDate(waypA, waypB) {
-  const weight = getWeight(waypA.dateFrom, waypB.dateFrom);
-
-  return weight ?? dayjs(waypA.dateFrom).diff(dayjs(waypB.dateFrom));
-}
-
-function sortWaypointsByTime(waypA, waypB) {
-  const weight = getWeight(waypA.dateFrom, waypB.dateFrom);
-
-  return (
-    weight ??
-    dayjs(waypB.dateTo).diff(dayjs(waypB.dateFrom)) -
-      dayjs(waypA.dateTo).diff(dayjs(waypA.dateFrom))
+const getByType = (searchedType, offersList) => {
+  const initializedOffers = offersList.find(
+    (currentOffers) => currentOffers.type === searchedType.eventType
   );
-}
-
-function sortWaypointsByPrice(waypA, waypB) {
-  return waypB.basePrice - waypA.basePrice;
-}
-
-function isDatesEqual(dateA, dateB) {
-  return (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB, 'D');
-}
-
-const filter = {
-  [FiltersType.EVERYTHING]: (events) => events,
-  [FiltersType.FUTURE]: (events) =>
-    events.filter(
-      (oneEvent) => dayjs(oneEvent.dateFrom).diff(new Date()) > ZERO
-    ),
-  [FiltersType.PRESENT]: (events) =>
-    events.filter(
-      (oneEvent) =>
-        dayjs(oneEvent.dateFrom).diff(new Date()) <= ZERO &&
-        dayjs(oneEvent.dateTo).diff(new Date()) >= ZERO
-    ),
-  [FiltersType.PAST]: (events) =>
-    events.filter((oneEvent) => dayjs(oneEvent.dateTo).diff(new Date()) < ZERO),
+  return initializedOffers.offers;
 };
 
-function ucFirst(str) {
-  if (!str) {
-    return str;
-  }
+const toUpperCaseFirstLetter = (word) =>
+  `${word.slice(0, 1).toUpperCase()}${word.slice(1)}`;
+const getValueFromString = (string) =>
+  string.toLowerCase().replaceAll(' ', '-');
+const sortDay = (firstPoint, secondPoint) => {
+  const firstPointDate = dayjs(firstPoint.dateFrom);
+  const secondPointDate = dayjs(secondPoint.dateFrom);
+  return firstPointDate.valueOf() - secondPointDate.valueOf();
+};
+const sortTime = (pointA, pointB) =>
+  getTimeDiff(pointB.dateFrom, pointB.dateTo, false) -
+  getTimeDiff(pointA.dateFrom, pointA.dateTo, false);
+const sortPrice = (pointA, pointB) => pointB.basePrice - pointA.basePrice;
 
-  return str[0].toUpperCase() + str.slice(1);
-}
+const isDatesEqual = (dateA, dateB) =>
+  (dateA === null && dateB === null) || dayjs(dateA).isSame(dateB);
+
+const isPointPast = ({ dateFrom, dateTo }) =>
+  dayjs().isAfter(dayjs(dateFrom)) && dayjs().isAfter(dayjs(dateTo));
+const isPointPresent = ({ dateFrom, dateTo }) =>
+  dayjs().isAfter(dayjs(dateFrom)) && dayjs().isBefore(dayjs(dateTo));
+const isPointFuture = ({ dateFrom, dateTo }) =>
+  dayjs().isBefore(dayjs(dateFrom)) && dayjs().isBefore(dayjs(dateTo));
 
 export {
-  humanizeDate,
-  humanizeDuration,
-  getWeight,
-  sortWaypointsByDate,
-  sortWaypointsByTime,
-  sortWaypointsByPrice,
+  sortDay,
+  sortTime,
+  sortPrice,
+  getById,
+  getByType,
   isDatesEqual,
-  filter,
-  ucFirst,
+  isPointPast,
+  isPointPresent,
+  isPointFuture,
+  toUpperCaseFirstLetter,
+  getValueFromString,
 };
